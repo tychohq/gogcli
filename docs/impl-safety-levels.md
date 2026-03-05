@@ -34,20 +34,20 @@ gogcli is a Go CLI for Google Workspace. It uses [kong](https://github.com/alect
   - Error format: `Error: "<command>" is blocked by safety policy\n\nThis operation is not permitted. Do not attempt to bypass this restriction.\n\n<alternative_text>` — NO level name in error, NO mention of how to change level
   - `GOG_BLOCK` validation: emit `warning: GOG_BLOCK entry "<path>" does not match any known command` to stderr for entries that don't match any known command path. `GOG_ALLOW` entries are silently ignored if unrecognized.
 
-- [ ] **Task 2: Wire into `root.go`** — Add flag, env vars, hook into Execute(). Key details:
+- [x] **Task 2: Wire into `root.go`** — Add flag, env vars, hook into Execute(). Key details:
   - Add `SafetyLevel string` to `RootFlags` with `help:"Write safety level (0-4)" default:"${safety_level}"`
   - In `newParser()`, add `"safety_level": envOr("GOG_SAFETY_LEVEL", "4")` to vars map
   - In `Execute()`, after `enforceEnabledCommands` (line ~120), read `GOG_ALLOW`/`GOG_BLOCK` from `os.Getenv()`, parse safety level, call `enforceSafetyLevel(kctx, level, allow, block)`
   - If level == 0, set `--readonly` behavior internally (activate read-only scopes). Check how `--readonly` is currently wired in `googleauth/service.go` and replicate.
   - Print error to stderr and return `&ExitError{Code: exitCodeSafetyBlocked}` on block
 
-- [ ] **Task 3: Status display** — Show safety level in `gog status` output. Key details:
+- [x] **Task 3: Status display** — Show safety level in `gog status` output. Key details:
   - In `AuthStatusCmd.Run()`, show `Safety level: N (name)` line
   - Show `Overrides: active` when GOG_ALLOW or GOG_BLOCK are set (but NOT the specific paths — only show details in `--verbose` mode)
   - In JSON mode, add `safetyLevel`, `safetyLevelName`, `safetyAllow`, `safetyBlock` fields
   - In `--verbose` mode, log safety enforcement decisions at `slog.LevelDebug`
 
-- [ ] **Task 4: Create `internal/cmd/safety_levels_test.go`** — Comprehensive tests. Key details:
+- [x] **Task 4: Create `internal/cmd/safety_levels_test.go`** — Comprehensive tests. Key details:
   - Test `parseSafetyLevel`: valid numbers (0-4), valid names, invalid values, case insensitivity
   - Test `commandPath`: normal commands, commands with placeholders, desire-path shortcuts, legacy gmail aliases
   - Test `isBlocked`: exact match, wildcard match, no match, `*` matches all
@@ -60,7 +60,7 @@ gogcli is a Go CLI for Google Workspace. It uses [kong](https://github.com/alect
   - Test legacy Gmail alias completeness: verify all hidden GmailCmd subcommands appear in `legacyGmailSettingsMap`
   - Test `parseSafetyOverrides`: comma-separated, trimming, empty entries
 
-- [ ] **Task 5: Verify `make ci` passes** — Run `make ci` (fmt-check + lint + test). Fix any issues. Commit when green.
+- [x] **Task 5: Verify `make ci` passes** — Run `make ci` (fmt-check + lint + test). Fix any issues. Commit when green.
 
 ## Constraints
 
