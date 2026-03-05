@@ -24,6 +24,7 @@ const (
 	exitCodePermissionDenied = 6
 	exitCodeRateLimited      = 7
 	exitCodeRetryable        = 8
+	exitCodeSafetyBlocked    = 9
 	exitCodeConfig           = 10
 
 	// 130 is the conventional "interrupted" exit code (SIGINT / Ctrl-C).
