@@ -52,6 +52,15 @@ Added to `exit_codes.go` alongside the existing codes. Code 9 is the next availa
 
 Unit tests for all exported and internal functions.
 
+#### Required test: desire-path completeness
+
+A test must enumerate all top-level CLI commands (via reflection on the `CLI` struct) and verify each either:
+1. Appears in the always-allowed prefix list, OR
+2. Appears in `desirePathMap`, OR
+3. Is a service namespace (e.g., `gmail`, `drive`) that has no safety-relevant direct path
+
+This test catches new desire-path shortcuts added upstream that aren't covered by safety maps. Similarly, a test must verify all hidden `GmailCmd` subcommands appear in `legacyGmailSettingsMap`.
+
 ---
 
 ## 2. Blocked Command Registry
@@ -76,13 +85,22 @@ var blockedByLevel = map[SafetyLevel][]string{
         "gmail.settings.watch.*",
         "chat.messages.send",
         "chat.dm.send",
+        "chat.dm.space",
         "chat.spaces.create",
-        "drive.share",
-        "drive.unshare",
-        "drive.comments.*",
-        "docs.comments.*",
+        "drive.comments.create",
+        "drive.comments.update",
+        "drive.comments.delete",
+        "docs.comments.add",
+        "docs.comments.reply",
+        "docs.comments.resolve",
+        "docs.comments.delete",
         "calendar.respond",
+        "calendar.propose-time",
         "appscript.run",
+        "classroom.invitations.create",
+        "classroom.guardian-invitations.create",
+        "classroom.announcements.create",
+        "classroom.coursework.create",
     },
     SafetyLevelCollaborate: {
         "gmail.send",
@@ -96,7 +114,10 @@ var blockedByLevel = map[SafetyLevel][]string{
         "gmail.settings.watch.*",
         "chat.messages.send",
         "chat.dm.send",
+        "chat.dm.space",
         "chat.spaces.create",
+        "classroom.invitations.create",
+        "classroom.guardian-invitations.create",
     },
     SafetyLevelStandard: {
         "gmail.batch.delete",
@@ -230,6 +251,10 @@ Returns `nil` if the command is permitted. Returns `*ExitError{Code: exitCodeSaf
 6. Look up `blockedByLevel[level]` and check `isBlocked(path, patterns)` → return error if matched
 7. Return nil
 
+### Threat model assumption
+
+Safety levels are only effective when the agent cannot modify its own environment variables, config files, or shell. If the agent has `os.Setenv` or shell access, `GOG_SAFETY_LEVEL` can be trivially bypassed. This is inherent to any process-level safety mechanism and is an accepted limitation. Hardened deployments should run gog in a sandbox where the agent's environment is immutable.
+
 ### Override precedence
 
 `GOG_BLOCK` takes priority over `GOG_ALLOW`. If the same path appears in both, it is blocked. This is the safer default — explicit blocks should not be accidentally undone.
@@ -299,7 +324,7 @@ block := parseSafetyOverrides(os.Getenv("GOG_BLOCK"))
 
 ### Validation
 
-Invalid `GOG_ALLOW`/`GOG_BLOCK` entries are silently ignored (non-existent command paths simply never match). This avoids breaking agents when commands are added/removed across versions.
+Unrecognized `GOG_BLOCK` entries emit a warning on stderr: `warning: GOG_BLOCK entry "<path>" does not match any known command`. Unrecognized `GOG_ALLOW` entries are silently ignored (non-existent paths simply never match). This asymmetry is deliberate: a typo in a block rule is a silent safety failure, while a typo in an allow rule is merely inert. This avoids breaking agents when commands are added/removed across versions.
 
 Invalid `GOG_SAFETY_LEVEL` values produce a usage error (exit code 2) with the message: `invalid safety level %q`. The error intentionally does **not** list valid levels.
 
@@ -321,7 +346,7 @@ Every safety-blocked error must follow these rules:
 ### Error template
 
 ```
-Error: "<command>" is blocked by safety policy (<level_name>)
+Error: "<command>" is blocked by safety policy
 
 This operation is not permitted. Do not attempt to bypass this restriction.
 
@@ -339,14 +364,20 @@ A `map[string]string` mapping command path prefixes to alternative suggestion te
 | `gmail.batch.delete` | `Use "gog gmail trash" to move messages to trash instead of permanent deletion.` |
 | `chat.messages.send` | `Direct messaging is disabled. No alternative is available at this safety level.` |
 | `chat.dm.send` | (same as `chat.messages.send`) |
+| `chat.dm.space` | `DM space creation is disabled. No alternative is available at this safety level.` |
 | `chat.spaces.create` | `Space creation is disabled. No alternative is available at this safety level.` |
 | `drive.share` | `File sharing is disabled. Upload or organize files without sharing.` |
 | `drive.comments.*` | `Drive comments are disabled. No alternative is available at this safety level.` |
 | `docs.comments.*` | `Doc comments are disabled. No alternative is available at this safety level.` |
 | `calendar.respond` | `RSVP is disabled. View event details with "gog calendar get".` |
+| `calendar.propose-time` | `Proposing a new time is disabled. View event details with "gog calendar get".` |
 | `appscript.run` | `Script execution is disabled. You can view scripts with "gog appscript get".` |
 | `gmail.settings.*` | `Settings modification is disabled. View current settings with the corresponding "get" or "list" subcommand.` |
 | `gmail.track.*` | `Email tracking is disabled. No alternative is available at this safety level.` |
+| `classroom.invitations.create` | `Creating invitations is disabled. No alternative is available at this safety level.` |
+| `classroom.guardian-invitations.create` | `Creating guardian invitations is disabled. No alternative is available at this safety level.` |
+| `classroom.announcements.create` | `Creating announcements is disabled. No alternative is available at this safety level.` |
+| `classroom.coursework.create` | `Creating coursework is disabled. No alternative is available at this safety level.` |
 
 If no alternative is registered for the blocked command, omit the alternative section entirely (just the error + "do not attempt" line).
 
@@ -399,8 +430,8 @@ Keyring:      ...
 ```
 
 - Show `Safety level: 4 (unrestricted)` even at the default — operators should always see what level is active
-- Format overrides as `+path` for GOG_ALLOW entries and `-path` for GOG_BLOCK entries
-- If no overrides, show `Overrides: none`
+- Show `Overrides: active` if any overrides exist, but do NOT show the specific override paths or format in normal output. This prevents agents from learning the override syntax.
+- In `--verbose` mode only, show full override details as `+path` / `-path`
 - In JSON mode, add `"safetyLevel"`, `"safetyLevelName"`, `"safetyAllow"`, and `"safetyBlock"` fields
 
 ### `--dry-run` output
