@@ -136,23 +136,23 @@ var safetyAlternatives = map[string]string{
 	"gmail.send": "To compose an email for human review, create a draft instead:\n" +
 		"  gog gmail drafts create --to <recipient> --subject \"...\" --body \"...\"\n\n" +
 		"The draft will appear in the user's Gmail drafts folder. A human must review and send it manually.",
-	"gmail.drafts.send":  "To compose an email for human review, create a draft instead:\n  gog gmail drafts create --to <recipient> --subject \"...\" --body \"...\"\n\nThe draft will appear in the user's Gmail drafts folder. A human must review and send it manually.",
-	"gmail.batch.delete": "Use \"gog gmail trash\" to move messages to trash instead of permanent deletion.",
-	"chat.messages.send": "Direct messaging is disabled. No alternative is available at this safety level.",
-	"chat.dm.send":       "Direct messaging is disabled. No alternative is available at this safety level.",
-	"chat.dm.space":      "DM space creation is disabled. No alternative is available at this safety level.",
-	"chat.spaces.create": "Space creation is disabled. No alternative is available at this safety level.",
-	"drive.comments.*":   "Drive comments are disabled. No alternative is available at this safety level.",
-	"docs.comments.*":    "Doc comments are disabled. No alternative is available at this safety level.",
-	"calendar.respond":   "RSVP is disabled. View event details with \"gog calendar get\".",
-	"calendar.propose-time":                  "Proposing a new time is disabled. View event details with \"gog calendar get\".",
-	"appscript.run":                          "Script execution is disabled. You can view scripts with \"gog appscript get\".",
-	"gmail.settings.*":                       "Settings modification is disabled. View current settings with the corresponding \"get\" or \"list\" subcommand.",
-	"gmail.track.*":                          "Email tracking is disabled. No alternative is available at this safety level.",
-	"classroom.invitations.create":           "Creating invitations is disabled. No alternative is available at this safety level.",
-	"classroom.guardian-invitations.create":  "Creating guardian invitations is disabled. No alternative is available at this safety level.",
-	"classroom.announcements.create":         "Creating announcements is disabled. No alternative is available at this safety level.",
-	"classroom.coursework.create":            "Creating coursework is disabled. No alternative is available at this safety level.",
+	"gmail.drafts.send":                     "To compose an email for human review, create a draft instead:\n  gog gmail drafts create --to <recipient> --subject \"...\" --body \"...\"\n\nThe draft will appear in the user's Gmail drafts folder. A human must review and send it manually.",
+	"gmail.batch.delete":                    "Use \"gog gmail trash\" to move messages to trash instead of permanent deletion.",
+	"chat.messages.send":                    "Direct messaging is disabled. No alternative is available at this safety level.",
+	"chat.dm.send":                          "Direct messaging is disabled. No alternative is available at this safety level.",
+	"chat.dm.space":                         "DM space creation is disabled. No alternative is available at this safety level.",
+	"chat.spaces.create":                    "Space creation is disabled. No alternative is available at this safety level.",
+	"drive.comments.*":                      "Drive comments are disabled. No alternative is available at this safety level.",
+	"docs.comments.*":                       "Doc comments are disabled. No alternative is available at this safety level.",
+	"calendar.respond":                      "RSVP is disabled. View event details with \"gog calendar get\".",
+	"calendar.propose-time":                 "Proposing a new time is disabled. View event details with \"gog calendar get\".",
+	"appscript.run":                         "Script execution is disabled. You can view scripts with \"gog appscript get\".",
+	"gmail.settings.*":                      "Settings modification is disabled. View current settings with the corresponding \"get\" or \"list\" subcommand.",
+	"gmail.track.*":                         "Email tracking is disabled. No alternative is available at this safety level.",
+	"classroom.invitations.create":          "Creating invitations is disabled. No alternative is available at this safety level.",
+	"classroom.guardian-invitations.create": "Creating guardian invitations is disabled. No alternative is available at this safety level.",
+	"classroom.announcements.create":        "Creating announcements is disabled. No alternative is available at this safety level.",
+	"classroom.coursework.create":           "Creating coursework is disabled. No alternative is available at this safety level.",
 }
 
 // commandPath normalizes a kong command path into dot-separated form,
@@ -177,9 +177,11 @@ func commandPath(kctx *kong.Context) string {
 		return mapped
 	}
 
-	// Map legacy Gmail settings aliases.
-	if mapped, ok := legacyGmailSettingsMap[path]; ok {
-		return mapped
+	// Map legacy Gmail settings aliases (prefix match for subcommands).
+	for prefix, mapped := range legacyGmailSettingsMap {
+		if path == prefix || strings.HasPrefix(path, prefix+".") {
+			return mapped + strings.TrimPrefix(path, prefix)
+		}
 	}
 
 	return path
