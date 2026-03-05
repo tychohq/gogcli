@@ -18,42 +18,42 @@ No writes to any service. Already implemented via `--readonly` / `--gmail-scope=
 
 Write to your own workspace. Create drafts. Organize existing items. **Nothing outbound — no messages reach other people.**
 
-| Service | Allowed | Blocked | Rationale |
-|---------|---------|---------|-----------|
-| **Gmail** | `drafts create/update/delete`, `labels *`, `archive`, `mark-read`, `unread`, `trash`, `batch modify` | `send`, `drafts send`, `batch delete` | Drafts + inbox management only |
-| **Calendar** | `create`, `update`, `delete`, `focus-time`, `ooo`, `working-location` | `respond` | Creating/editing your own events is fine; RSVP notifies the organizer |
-| **Chat** | — | `messages send`, `dm send`, `spaces create` | All chat writes are outbound |
-| **Drive** | `upload`, `mkdir`, `copy`, `move`, `rename`, `delete` | `share`, `comments create/reply` | Manage your own files; sharing/commenting reaches others |
-| **Docs** | `create`, `copy`, `write`, `insert`, `delete`, `update`, `edit`, `clear` | `comments add/reply` | Edit your own docs; comments notify collaborators |
-| **Slides** | `create`, `copy`, `create-from-markdown`, `add-slide`, `delete-slide`, `update-notes`, `replace-slide` | — | All self-contained |
-| **Sheets** | `create`, `copy`, `update`, `append`, `insert`, `clear`, `format` | — | All self-contained |
-| **Contacts** | `create`, `update`, `delete` | — | Address book is private |
-| **Tasks** | `add`, `update`, `done`, `undo`, `delete`, `clear`, `lists create` | — | Personal todo list |
-| **Forms** | `create` | — | Self-contained |
-| **AppScript** | `create` | `run` | Creating is safe; running executes arbitrary code |
-| **Gmail Settings** | — | `filters create/delete`, `delegates add/remove`, `forwarding create/delete`, `autoforward update`, `sendas create/delete/update/verify`, `vacation update`, `watch *` | Settings changes can have outbound side effects (forwarding, auto-replies, delegates) |
+| Service                  | Allowed                                                                                                              | Blocked                                                                                                                                                                             | Rationale                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Gmail**          | `drafts create/update/delete`, `labels *`, `archive`, `mark-read`, `unread`, `trash`, `batch modify`   | `send`, `drafts send`, `batch delete`                                                                                                                                         | Drafts + inbox management only                                                        |
+| **Calendar**       | `create`, `update`, `delete`, `focus-time`, `ooo`, `working-location`                                    | `respond`                                                                                                                                                                         | Creating/editing your own events is fine; RSVP notifies the organizer                 |
+| **Chat**           | —                                                                                                                   | `messages send`, `dm send`, `spaces create`                                                                                                                                   | All chat writes are outbound                                                          |
+| **Drive**          | `upload`, `mkdir`, `copy`, `move`, `rename`, `delete`                                                    | `share`, `comments create/reply`                                                                                                                                                | Manage your own files; sharing/commenting reaches others                              |
+| **Docs**           | `create`, `copy`, `write`, `insert`, `delete`, `update`, `edit`, `clear`                             | `comments add/reply`                                                                                                                                                              | Edit your own docs; comments notify collaborators                                     |
+| **Slides**         | `create`, `copy`, `create-from-markdown`, `add-slide`, `delete-slide`, `update-notes`, `replace-slide` | —                                                                                                                                                                                  | All self-contained                                                                    |
+| **Sheets**         | `create`, `copy`, `update`, `append`, `insert`, `clear`, `format`                                      | —                                                                                                                                                                                  | All self-contained                                                                    |
+| **Contacts**       | `create`, `update`, `delete`                                                                                   | —                                                                                                                                                                                  | Address book is private                                                               |
+| **Tasks**          | `add`, `update`, `done`, `undo`, `delete`, `clear`, `lists create`                                     | —                                                                                                                                                                                  | Personal todo list                                                                    |
+| **Forms**          | `create`                                                                                                           | —                                                                                                                                                                                  | Self-contained                                                                        |
+| **AppScript**      | `create`                                                                                                           | `run`                                                                                                                                                                             | Creating is safe; running executes arbitrary code                                     |
+| **Gmail Settings** |  | , , , , ,  | Filters are inbox organization; forwarding-via-filter is a known edge case. Other settings can have outbound side effects. |
 
 ### Level 2: Draft & Collaborate
 
 Everything in Level 1, **plus** collaborative actions within shared workspaces. Still no direct messaging.
 
-| Service | Added from Level 1 | Still blocked |
-|---------|-------------------|---------------|
-| **Calendar** | `respond` (RSVP) | — |
-| **Drive** | `share`, `unshare`, `comments create/update/delete/reply` | — |
-| **Docs** | `comments add/reply/resolve/delete` | — |
-| **Gmail Settings** | `filters create/delete`, `vacation update` | `delegates add/remove`, `forwarding create/delete`, `autoforward update`, `sendas *`, `watch *` |
-| **AppScript** | `run` | — |
+| Service                  | Added from Level 1                                              | Still blocked                                                                                             |
+| ------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Calendar**       | `respond` (RSVP)                                              | —                                                                                                        |
+| **Drive**          | `share`, `unshare`, `comments create/update/delete/reply` | —                                                                                                        |
+| **Docs**           | `comments add/reply/resolve/delete`                           | —                                                                                                        |
+| **Gmail Settings** |                                                  | , , , ,  |
+| **AppScript**      | `run`                                                         | —                                                                                                        |
 
 ### Level 3: Full Write (No Admin)
 
 Everything in Level 2, **plus** direct messaging. The only things blocked are destructive admin/settings operations.
 
-| Service | Added from Level 2 | Still blocked |
-|---------|-------------------|---------------|
-| **Gmail** | `send`, `drafts send` | `batch delete` (permanent delete) |
-| **Chat** | `messages send`, `dm send`, `spaces create` | — |
-| **Gmail Settings** | `sendas *` | `delegates add/remove`, `forwarding create/delete`, `autoforward update`, `watch *` |
+| Service                  | Added from Level 2                                | Still blocked                                                                               |
+| ------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Gmail**          | `send`, `drafts send`                         | `batch delete` (permanent delete)                                                         |
+| **Chat**           | `messages send`, `dm send`, `spaces create` | —                                                                                          |
+| **Gmail Settings** | `sendas *`                                      | `delegates add/remove`, `forwarding create/delete`, `autoforward update`, `watch *` |
 
 ### Level 4: Unrestricted
 
@@ -63,60 +63,60 @@ All operations allowed. No CLI-level blocking. This is the current default behav
 
 ## Summary Matrix
 
-| Command | L0 | L1 | L2 | L3 | L4 |
-|---------|:--:|:--:|:--:|:--:|:--:|
-| **Gmail** | | | | | |
-| `gmail search/get/messages/thread/attachment/url/history` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `gmail labels *` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `gmail archive/mark-read/unread/trash` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `gmail batch modify` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `gmail drafts create/update/delete/list/get` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `gmail send` / `gmail drafts send` / `send` | ❌ | ❌ | ❌ | ✅ | ✅ |
-| `gmail batch delete` | ❌ | ❌ | ❌ | ❌ | ✅ |
-| `gmail track *` | ❌ | ❌ | ❌ | ✅ | ✅ |
-| `gmail settings filters *` | ❌ | ❌ | ✅ | ✅ | ✅ |
-| `gmail settings vacation *` | ❌ | ❌ | ✅ | ✅ | ✅ |
-| `gmail settings sendas *` | ❌ | ❌ | ❌ | ✅ | ✅ |
-| `gmail settings delegates *` | ❌ | ❌ | ❌ | ❌ | ✅ |
-| `gmail settings forwarding *` | ❌ | ❌ | ❌ | ❌ | ✅ |
-| `gmail settings autoforward *` | ❌ | ❌ | ❌ | ❌ | ✅ |
-| `gmail settings watch *` | ❌ | ❌ | ❌ | ❌ | ✅ |
-| **Calendar** | | | | | |
-| `calendar events/list/get/free-busy/calendars` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `calendar create/update/delete/focus-time/ooo/working-location` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `calendar respond` | ❌ | ❌ | ✅ | ✅ | ✅ |
-| **Chat** | | | | | |
-| `chat spaces list/get`, `chat messages list/get`, `chat dm list` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `chat messages send`, `chat dm send` | ❌ | ❌ | ❌ | ✅ | ✅ |
-| `chat spaces create` | ❌ | ❌ | ❌ | ✅ | ✅ |
-| **Drive** | | | | | |
-| `drive ls/search/get/download/info/permissions` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `drive upload/mkdir/copy/move/rename/delete` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `drive share/unshare` | ❌ | ❌ | ✅ | ✅ | ✅ |
-| `drive comments *` | ❌ | ❌ | ✅ | ✅ | ✅ |
-| **Docs** | | | | | |
-| `docs get/export/list` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `docs create/copy/write/insert/delete/update/edit/clear` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `docs comments *` | ❌ | ❌ | ✅ | ✅ | ✅ |
-| **Slides** | | | | | |
-| `slides get/export/list` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Command                                                                                       | L0 | L1 | L2 | L3 | L4 |
+| --------------------------------------------------------------------------------------------- | :-: | :-: | :-: | :-: | :-: |
+| **Gmail**                                                                               |    |    |    |    |    |
+| `gmail search/get/messages/thread/attachment/url/history`                                   | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `gmail labels *`                                                                            | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `gmail archive/mark-read/unread/trash`                                                      | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `gmail batch modify`                                                                        | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `gmail drafts create/update/delete/list/get`                                                | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `gmail send` / `gmail drafts send` / `send`                                             | ❌ | ❌ | ❌ | ✅ | ✅ |
+| `gmail batch delete`                                                                        | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `gmail track *`                                                                             | ❌ | ❌ | ❌ | ✅ | ✅ |
+| `gmail settings filters *`                                                                  | ❌ | ❌ | ✅ | ✅ | ✅ |
+| `gmail settings vacation *`                                                                 | ❌ | ❌ | ✅ | ✅ | ✅ |
+| `gmail settings sendas *`                                                                   | ❌ | ❌ | ❌ | ✅ | ✅ |
+| `gmail settings delegates *`                                                                | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `gmail settings forwarding *`                                                               | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `gmail settings autoforward *`                                                              | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `gmail settings watch *`                                                                    | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Calendar**                                                                            |    |    |    |    |    |
+| `calendar events/list/get/free-busy/calendars`                                              | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `calendar create/update/delete/focus-time/ooo/working-location`                             | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `calendar respond`                                                                          | ❌ | ❌ | ✅ | ✅ | ✅ |
+| **Chat**                                                                                |    |    |    |    |    |
+| `chat spaces list/get`, `chat messages list/get`, `chat dm list`                        | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `chat messages send`, `chat dm send`                                                      | ❌ | ❌ | ❌ | ✅ | ✅ |
+| `chat spaces create`                                                                        | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Drive**                                                                               |    |    |    |    |    |
+| `drive ls/search/get/download/info/permissions`                                             | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `drive upload/mkdir/copy/move/rename/delete`                                                | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `drive share/unshare`                                                                       | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `drive comments *`                                                                          | ❌ | ❌ | ✅ | ✅ | ✅ |
+| **Docs**                                                                                |    |    |    |    |    |
+| `docs get/export/list`                                                                      | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `docs create/copy/write/insert/delete/update/edit/clear`                                    | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `docs comments *`                                                                           | ❌ | ❌ | ✅ | ✅ | ✅ |
+| **Slides**                                                                              |    |    |    |    |    |
+| `slides get/export/list`                                                                    | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `slides create/copy/add-slide/delete-slide/update-notes/replace-slide/create-from-markdown` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Sheets** | | | | | |
-| `sheets get/export/list/read` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `sheets create/copy/update/append/insert/clear/format` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Contacts** | | | | | |
-| `contacts list/get/search/directory/other` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `contacts create/update/delete` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Tasks** | | | | | |
-| `tasks list/get` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `tasks add/update/done/undo/delete/clear/lists create` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Forms** | | | | | |
-| `forms get/responses` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `forms create` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **AppScript** | | | | | |
-| `appscript list/get` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `appscript create` | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `appscript run` | ❌ | ❌ | ✅ | ✅ | ✅ |
+| **Sheets**                                                                              |    |    |    |    |    |
+| `sheets get/export/list/read`                                                               | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `sheets create/copy/update/append/insert/clear/format`                                      | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Contacts**                                                                            |    |    |    |    |    |
+| `contacts list/get/search/directory/other`                                                  | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `contacts create/update/delete`                                                             | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Tasks**                                                                               |    |    |    |    |    |
+| `tasks list/get`                                                                            | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `tasks add/update/done/undo/delete/clear/lists create`                                      | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Forms**                                                                               |    |    |    |    |    |
+| `forms get/responses`                                                                       | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `forms create`                                                                              | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **AppScript**                                                                           |    |    |    |    |    |
+| `appscript list/get`                                                                        | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `appscript create`                                                                          | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `appscript run`                                                                             | ❌ | ❌ | ✅ | ✅ | ✅ |
 
 ## UX
 
@@ -172,46 +172,52 @@ To change the safety level: --safety-level=<0-4> or GOG_SAFETY_LEVEL=<0-4>
 
 ## Level Names
 
-| Level | Numeric | Name | One-liner |
-|-------|---------|------|-----------|
-| 0 | `0` | `readonly` | Read everything, write nothing |
-| 1 | `1` | `draft` | Draft, organize, edit your own stuff — nothing outbound |
-| 2 | `2` | `collaborate` | Level 1 + comments, sharing, RSVP — collaborative but no messaging |
-| 3 | `3` | `standard` | Full write + messaging — no dangerous admin operations |
-| 4 | `4` | `unrestricted` | Everything allowed |
+| Level | Numeric | Name             | One-liner                                                           |
+| ----- | ------- | ---------------- | ------------------------------------------------------------------- |
+| 0     | `0`   | `readonly`     | Read everything, write nothing                                      |
+| 1     | `1`   | `draft`        | Draft, organize, edit your own stuff — nothing outbound            |
+| 2     | `2`   | `collaborate`  | Level 1 + comments, sharing, RSVP — collaborative but no messaging |
+| 3     | `3`   | `standard`     | Full write + messaging — no dangerous admin operations             |
+| 4     | `4`   | `unrestricted` | Everything allowed                                                  |
 
 Levels can be referenced by number or name: `--safety-level=draft` or `--safety-level=1`.
 
 ## Implementation Plan
 
 ### Task 1: Define safety level types and blocked command registry
+
 - Create `internal/cmd/safety_levels.go`
 - Define level enum and per-level blocked command paths
 - Pattern matching for command paths (e.g., `gmail.settings.*` blocks all settings subcommands)
 
 ### Task 2: Add `--safety-level` flag and env var
+
 - Add to `RootFlags` in `root.go`
 - Add `GOG_SAFETY_LEVEL` env var
 - Add `GOG_ALLOW` and `GOG_BLOCK` for per-service overrides
 - Wire into `Run()` after `enforceEnabledCommands`
 
 ### Task 3: Enforcement function
-- `enforceSafetyLevel(kctx, level, allow, block)` 
+
+- `enforceSafetyLevel(kctx, level, allow, block)`
 - Match full command path against blocked list for the active level
 - Apply allow/block overrides
 - Return clear error with alternative suggestion
 
 ### Task 4: Status display
+
 - Show safety level and overrides in `gog status` / `gog auth status`
 - Show in `--dry-run` output
 - Show in `--verbose` output
 
 ### Task 5: Tests
+
 - Unit tests for each level with each blocked/allowed command
 - Override tests (GOG_ALLOW / GOG_BLOCK)
 - Edge cases: command aliases, top-level shortcuts (`send`, `upload`, etc.)
 
 ### Task 6: Documentation
+
 - README section on safety levels
 - Agent mode setup guide
 - Update `gog auth add` help text to mention safety levels
