@@ -18,32 +18,32 @@ No writes to any service. Already implemented via `--readonly` / `--gmail-scope=
 
 Write to your own workspace. Create drafts. Organize existing items. **Nothing outbound — no messages reach other people.**
 
-| Service                  | Allowed                                                                                                              | Blocked                                                                                                                                                                             | Rationale                                                                             |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| **Gmail**          | `drafts create/update/delete`, `labels *`, `archive`, `mark-read`, `unread`, `trash`, `batch modify`   | `send`, `drafts send`, `batch delete`                                                                                                                                         | Drafts + inbox management only                                                        |
-| **Calendar**       | `create`, `update`, `delete`, `focus-time`, `ooo`, `working-location`                                    | `respond`                                                                                                                                                                         | Creating/editing your own events is fine; RSVP notifies the organizer                 |
-| **Chat**           | —                                                                                                                   | `messages send`, `dm send`, `spaces create`                                                                                                                                   | All chat writes are outbound                                                          |
-| **Drive**          | `upload`, `mkdir`, `copy`, `move`, `rename`, `delete`                                                    | `share`, `comments create/reply`                                                                                                                                                | Manage your own files; sharing/commenting reaches others                              |
-| **Docs**           | `create`, `copy`, `write`, `insert`, `delete`, `update`, `edit`, `clear`                             | `comments add/reply`                                                                                                                                                              | Edit your own docs; comments notify collaborators                                     |
-| **Slides**         | `create`, `copy`, `create-from-markdown`, `add-slide`, `delete-slide`, `update-notes`, `replace-slide` | —                                                                                                                                                                                  | All self-contained                                                                    |
-| **Sheets**         | `create`, `copy`, `update`, `append`, `insert`, `clear`, `format`                                      | —                                                                                                                                                                                  | All self-contained                                                                    |
-| **Contacts**       | `create`, `update`, `delete`                                                                                   | —                                                                                                                                                                                  | Address book is private                                                               |
-| **Tasks**          | `add`, `update`, `done`, `undo`, `delete`, `clear`, `lists create`                                     | —                                                                                                                                                                                  | Personal todo list                                                                    |
-| **Forms**          | `create`                                                                                                           | —                                                                                                                                                                                  | Self-contained                                                                        |
-| **AppScript**      | `create`                                                                                                           | `run`                                                                                                                                                                             | Creating is safe; running executes arbitrary code                                     |
-| **Gmail Settings** |  | , , , , ,  | Filters are inbox organization; forwarding-via-filter is a known edge case. Other settings can have outbound side effects. |
+| Service                  | Allowed                                                                                                              | Blocked                                           | Rationale                                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Gmail**          | `drafts create/update/delete`, `labels *`, `archive`, `mark-read`, `unread`, `trash`, `batch modify`   | `send`, `drafts send`, `batch delete`       | Drafts + inbox management only                                                                                             |
+| **Calendar**       | `create`, `update`, `delete`, `focus-time`, `ooo`, `working-location`                                    | `respond`                                       | Creating/editing your own events is fine; RSVP notifies the organizer                                                      |
+| **Chat**           | —                                                                                                                   | `messages send`, `dm send`, `spaces create` | All chat writes are outbound                                                                                               |
+| **Drive**          | `upload`, `mkdir`, `copy`, `move`, `rename`, `delete`                                                    | `share`, `comments create/reply`              | Manage your own files; sharing/commenting reaches others                                                                   |
+| **Docs**           | `create`, `copy`, `write`, `insert`, `delete`, `update`, `edit`, `clear`                             | `comments add/reply`                            | Edit your own docs; comments notify collaborators                                                                          |
+| **Slides**         | `create`, `copy`, `create-from-markdown`, `add-slide`, `delete-slide`, `update-notes`, `replace-slide` | —                                                | All self-contained                                                                                                         |
+| **Sheets**         | `create`, `copy`, `update`, `append`, `insert`, `clear`, `format`                                      | —                                                | All self-contained                                                                                                         |
+| **Contacts**       | `create`, `update`, `delete`                                                                                   | —                                                | Address book is private                                                                                                    |
+| **Tasks**          | `add`, `update`, `done`, `undo`, `delete`, `clear`, `lists create`                                     | —                                                | Personal todo list                                                                                                         |
+| **Forms**          | `create`                                                                                                           | —                                                | Self-contained                                                                                                             |
+| **AppScript**      | `create`                                                                                                           | `run`                                           | Creating is safe; running executes arbitrary code                                                                          |
+| **Gmail Settings** |                                                                                                                      | , , , , ,                                         | Filters are inbox organization; forwarding-via-filter is a known edge case. Other settings can have outbound side effects. |
 
 ### Level 2: Draft & Collaborate
 
 Everything in Level 1, **plus** collaborative actions within shared workspaces. Still no direct messaging.
 
-| Service                  | Added from Level 1                                              | Still blocked                                                                                             |
-| ------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Calendar**       | `respond` (RSVP)                                              | —                                                                                                        |
-| **Drive**          | `share`, `unshare`, `comments create/update/delete/reply` | —                                                                                                        |
-| **Docs**           | `comments add/reply/resolve/delete`                           | —                                                                                                        |
-| **Gmail Settings** |                                                  | , , , ,  |
-| **AppScript**      | `run`                                                         | —                                                                                                        |
+| Service                  | Added from Level 1                                              | Still blocked |
+| ------------------------ | --------------------------------------------------------------- | ------------- |
+| **Calendar**       | `respond` (RSVP)                                              | —            |
+| **Drive**          | `share`, `unshare`, `comments create/update/delete/reply` | —            |
+| **Docs**           | `comments add/reply/resolve/delete`                           | —            |
+| **Gmail Settings** |                                                                 | , , , ,       |
+| **AppScript**      | `run`                                                         | —            |
 
 ### Level 3: Full Write (No Admin)
 
@@ -74,7 +74,7 @@ All operations allowed. No CLI-level blocking. This is the current default behav
 | `gmail send` / `gmail drafts send` / `send`                                             | ❌ | ❌ | ❌ | ✅ | ✅ |
 | `gmail batch delete`                                                                        | ❌ | ❌ | ❌ | ❌ | ✅ |
 | `gmail track *`                                                                             | ❌ | ❌ | ❌ | ✅ | ✅ |
-| `gmail settings filters *`                                                                  | ❌ | ❌ | ✅ | ✅ | ✅ |
+| `gmail settings filters *`                                                                  | ❌ | ✅ | ✅ | ✅ | ✅ |
 | `gmail settings vacation *`                                                                 | ❌ | ❌ | ✅ | ✅ | ✅ |
 | `gmail settings sendas *`                                                                   | ❌ | ❌ | ❌ | ✅ | ✅ |
 | `gmail settings delegates *`                                                                | ❌ | ❌ | ❌ | ❌ | ✅ |
@@ -123,15 +123,14 @@ All operations allowed. No CLI-level blocking. This is the current default behav
 ### Flag
 
 ```bash
-# Set via flag
-gog --safety-level 1 gmail send --to ...
-# Error: "gmail send" is blocked at safety level 1 (draft-and-organize).
-# Tip: use "gmail drafts create" to create a draft instead.
-# To allow sending, use --safety-level 3 or higher.
-
-# Set via env var (recommended for agents)
+# Set via env var (recommended — set by the human operator, not the agent)
 export GOG_SAFETY_LEVEL=1
+
+# Or via flag (for testing / interactive use)
+gog --safety-level 1 gmail drafts create --to user@example.com --subject "Hello" --body "..."
 ```
+
+**The safety level should be set by the human operator** in the agent's environment, not by the agent itself. The flag exists for interactive testing, but in production the env var is the intended mechanism — it's set once in the agent's config and the agent never sees it as something it can change.
 
 ### Per-service overrides
 
@@ -158,17 +157,36 @@ Overrides:    +chat.messages.send, +chat.dm.send
 
 ### Error messages
 
-Blocked commands should give actionable guidance:
+Error messages must be a **hard wall**. They should:
+1. Tell the agent exactly what's blocked and why
+2. Suggest the safe alternative (e.g., create a draft)
+3. **Never** tell the agent how to change the safety level
+4. Explicitly tell the agent not to try to work around it
 
 ```
-Error: "gmail send" is blocked at safety level 1 (draft-and-organize)
+Error: "gmail send" is blocked by safety policy (level 1: draft)
 
-Create a draft instead:
+This operation is not permitted. Do not attempt to bypass this restriction.
+
+To compose an email for human review, create a draft instead:
   gog gmail drafts create --to user@example.com --subject "..." --body "..."
 
-The draft will appear in the user's Gmail drafts folder for manual review and sending.
-To change the safety level: --safety-level=<0-4> or GOG_SAFETY_LEVEL=<0-4>
+The draft will appear in the user's Gmail drafts folder. A human must review and send it manually.
 ```
+
+```
+Error: "chat messages send" is blocked by safety policy (level 1: draft)
+
+This operation is not permitted. Do not attempt to bypass this restriction.
+Direct messaging is disabled. No alternative is available at this safety level.
+```
+
+The error intentionally omits:
+- How to change the safety level
+- What flag or env var controls it
+- What level would allow the operation
+
+Changing the safety level should require a human editing the environment or config — not something an agent can self-escalate.
 
 ## Level Names
 
