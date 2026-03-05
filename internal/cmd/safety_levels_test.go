@@ -78,6 +78,7 @@ func parseTestKong(t *testing.T, args []string) *kong.Context {
 			"color":            "auto",
 			"client":           "",
 			"enabled_commands": "",
+			"safety_level":     "4",
 			"json":             "false",
 			"plain":            "false",
 			"version":          "test",

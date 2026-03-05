@@ -18,7 +18,7 @@ gogcli is a Go CLI for Google Workspace. It uses [kong](https://github.com/alect
 
 ## Tasks
 
-- [ ] **Task 1: Create `internal/cmd/safety_levels.go`** — Types, constants, blocked registry, enforcement function, error messages. See spec sections 1-6. Key details:
+- [x] **Task 1: Create `internal/cmd/safety_levels.go`** — Types, constants, blocked registry, enforcement function, error messages. See spec sections 1-6. Key details:
   - `SafetyLevel` type (int, constants 0-4)
   - `safetyLevelNames` map (bidirectional: "readonly"↔0, "draft"↔1, etc.)
   - `parseSafetyLevel(s string) (SafetyLevel, error)` — accepts both numeric and name strings. Error does NOT list valid values.
