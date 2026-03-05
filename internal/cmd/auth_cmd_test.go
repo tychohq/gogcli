@@ -490,3 +490,190 @@ func TestAuthListRemoveTokensListDelete_JSON(t *testing.T) {
 		t.Fatalf("expected empty keys, got: %#v", emptyKeysResp.Keys)
 	}
 }
+
+func TestAuthStatus_JSON_SafetyLevel_Default(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("GOG_KEYRING_BACKEND", "file")
+	os.Unsetenv("GOG_ALLOW")
+	os.Unsetenv("GOG_BLOCK")
+
+	out := captureStdout(t, func() {
+		_ = captureStderr(t, func() {
+			if err := Execute([]string{"--json", "auth", "status"}); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+		})
+	})
+
+	var payload struct {
+		Safety struct {
+			Level int    `json:"safetyLevel"`
+			Name  string `json:"safetyLevelName"`
+		} `json:"safety"`
+	}
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("unmarshal: %v\nout=%q", err, out)
+	}
+	if payload.Safety.Level != 4 {
+		t.Fatalf("expected safety level 4, got %d", payload.Safety.Level)
+	}
+	if payload.Safety.Name != "unrestricted" {
+		t.Fatalf("expected safety name unrestricted, got %q", payload.Safety.Name)
+	}
+}
+
+func TestAuthStatus_JSON_SafetyLevel_Custom(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("GOG_KEYRING_BACKEND", "file")
+	os.Unsetenv("GOG_ALLOW")
+	os.Unsetenv("GOG_BLOCK")
+
+	out := captureStdout(t, func() {
+		_ = captureStderr(t, func() {
+			if err := Execute([]string{"--json", "--safety-level", "1", "auth", "status"}); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+		})
+	})
+
+	var payload struct {
+		Safety struct {
+			Level int    `json:"safetyLevel"`
+			Name  string `json:"safetyLevelName"`
+		} `json:"safety"`
+	}
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("unmarshal: %v\nout=%q", err, out)
+	}
+	if payload.Safety.Level != 1 {
+		t.Fatalf("expected safety level 1, got %d", payload.Safety.Level)
+	}
+	if payload.Safety.Name != "draft" {
+		t.Fatalf("expected safety name draft, got %q", payload.Safety.Name)
+	}
+}
+
+func TestAuthStatus_JSON_SafetyOverrides(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("GOG_KEYRING_BACKEND", "file")
+	t.Setenv("GOG_ALLOW", "gmail.send")
+	t.Setenv("GOG_BLOCK", "drive.upload,drive.download")
+
+	out := captureStdout(t, func() {
+		_ = captureStderr(t, func() {
+			if err := Execute([]string{"--json", "auth", "status"}); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+		})
+	})
+
+	var payload struct {
+		Safety struct {
+			Level int      `json:"safetyLevel"`
+			Name  string   `json:"safetyLevelName"`
+			Allow []string `json:"safetyAllow"`
+			Block []string `json:"safetyBlock"`
+		} `json:"safety"`
+	}
+	if err := json.Unmarshal([]byte(out), &payload); err != nil {
+		t.Fatalf("unmarshal: %v\nout=%q", err, out)
+	}
+	if len(payload.Safety.Allow) != 1 || payload.Safety.Allow[0] != "gmail.send" {
+		t.Fatalf("expected allow [gmail.send], got %v", payload.Safety.Allow)
+	}
+	if len(payload.Safety.Block) != 2 {
+		t.Fatalf("expected 2 block entries, got %v", payload.Safety.Block)
+	}
+}
+
+func TestAuthStatus_JSON_NoOverridesOmitted(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("GOG_KEYRING_BACKEND", "file")
+	os.Unsetenv("GOG_ALLOW")
+	os.Unsetenv("GOG_BLOCK")
+
+	out := captureStdout(t, func() {
+		_ = captureStderr(t, func() {
+			if err := Execute([]string{"--json", "auth", "status"}); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+		})
+	})
+
+	// When no overrides, safetyAllow/safetyBlock should not appear in JSON.
+	if strings.Contains(out, "safetyAllow") || strings.Contains(out, "safetyBlock") {
+		t.Fatalf("expected no override fields in JSON when unset, got: %s", out)
+	}
+}
+
+func TestAuthStatus_Text_SafetyLevel(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("GOG_KEYRING_BACKEND", "file")
+	os.Unsetenv("GOG_ALLOW")
+	os.Unsetenv("GOG_BLOCK")
+
+	out := captureStdout(t, func() {
+		_ = captureStderr(t, func() {
+			if err := Execute([]string{"--safety-level", "2", "auth", "status"}); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+		})
+	})
+
+	if !strings.Contains(out, "safety_level\t2 (collaborate)") {
+		t.Fatalf("expected safety_level line, got: %q", out)
+	}
+	if strings.Contains(out, "safety_overrides") {
+		t.Fatalf("expected no overrides line when unset, got: %q", out)
+	}
+}
+
+func TestAuthStatus_Text_SafetyOverrides(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("GOG_KEYRING_BACKEND", "file")
+	t.Setenv("GOG_ALLOW", "gmail.send")
+	os.Unsetenv("GOG_BLOCK")
+
+	out := captureStdout(t, func() {
+		_ = captureStderr(t, func() {
+			if err := Execute([]string{"auth", "status"}); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+		})
+	})
+
+	if !strings.Contains(out, "safety_level\t4 (unrestricted)") {
+		t.Fatalf("expected safety_level line, got: %q", out)
+	}
+	if !strings.Contains(out, "safety_overrides\tactive") {
+		t.Fatalf("expected safety_overrides active, got: %q", out)
+	}
+}
+
+func TestAuthStatus_Text_SafetyLevelEnvVar(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("GOG_KEYRING_BACKEND", "file")
+	t.Setenv("GOG_SAFETY_LEVEL", "0")
+	os.Unsetenv("GOG_ALLOW")
+	os.Unsetenv("GOG_BLOCK")
+
+	out := captureStdout(t, func() {
+		_ = captureStderr(t, func() {
+			// auth status is always-allowed even at level 0
+			if err := Execute([]string{"auth", "status"}); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+		})
+	})
+
+	if !strings.Contains(out, "safety_level\t0 (readonly)") {
+		t.Fatalf("expected safety_level 0 (readonly), got: %q", out)
+	}
+}
