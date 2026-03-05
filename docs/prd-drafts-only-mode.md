@@ -23,7 +23,7 @@ Write to your own workspace. Create drafts. Organize existing items. **Nothing o
 | **Gmail**          | `drafts create/update/delete`, `labels *`, `archive`, `mark-read`, `unread`, `trash`, `batch modify`   | `send`, `drafts send`, `batch delete`       | Drafts + inbox management only                                                                                             |
 | **Calendar**       | `create`, `update`, `delete`, `focus-time`, `ooo`, `working-location`                                    | `respond`                                       | Creating/editing your own events is fine; RSVP notifies the organizer                                                      |
 | **Chat**           | —                                                                                                                   | `messages send`, `dm send`, `spaces create` | All chat writes are outbound                                                                                               |
-| **Drive**          | `upload`, `mkdir`, `copy`, `move`, `rename`, `delete`                                                    | `share`, `comments create/reply`              | Manage your own files; sharing/commenting reaches others                                                                   |
+| **Drive**          | `upload`, `mkdir`, `copy`, `move`, `rename`, `delete`, `share`, `unshare`                       | `comments create/update/delete`                                                                                                                                             | Manage your own files; sharing is allowed (grants access, no message sent). Comments notify collaborators. |
 | **Docs**           | `create`, `copy`, `write`, `insert`, `delete`, `update`, `edit`, `clear`                             | `comments add/reply`                            | Edit your own docs; comments notify collaborators                                                                          |
 | **Slides**         | `create`, `copy`, `create-from-markdown`, `add-slide`, `delete-slide`, `update-notes`, `replace-slide` | —                                                | All self-contained                                                                                                         |
 | **Sheets**         | `create`, `copy`, `update`, `append`, `insert`, `clear`, `format`                                      | —                                                | All self-contained                                                                                                         |
@@ -31,7 +31,7 @@ Write to your own workspace. Create drafts. Organize existing items. **Nothing o
 | **Tasks**          | `add`, `update`, `done`, `undo`, `delete`, `clear`, `lists create`                                     | —                                                | Personal todo list                                                                                                         |
 | **Forms**          | `create`                                                                                                           | —                                                | Self-contained                                                                                                             |
 | **AppScript**      | `create`                                                                                                           | `run`                                           | Creating is safe; running executes arbitrary code                                                                          |
-| **Gmail Settings** |                                                                                                                      | , , , , ,                                         | Filters are inbox organization; forwarding-via-filter is a known edge case. Other settings can have outbound side effects. |
+| **Gmail Settings** | `filters create/delete` | `delegates add/remove`, `forwarding create/delete`, `autoforward update`, `sendas create/delete/update/verify`, `vacation update`, `watch *` | Filters are inbox organization; forwarding-via-filter is a known edge case. Other settings have outbound side effects. |
 
 ### Level 2: Draft & Collaborate
 
@@ -42,7 +42,7 @@ Everything in Level 1, **plus** collaborative actions within shared workspaces. 
 | **Calendar**       | `respond` (RSVP)                                              | —            |
 | **Drive**          | `share`, `unshare`, `comments create/update/delete/reply` | —            |
 | **Docs**           | `comments add/reply/resolve/delete`                           | —            |
-| **Gmail Settings** |                                                                 | , , , ,       |
+| **Gmail Settings** | `vacation update` | `delegates add/remove`, `forwarding create/delete`, `autoforward update`, `sendas *`, `watch *` |
 | **AppScript**      | `run`                                                         | —            |
 
 ### Level 3: Full Write (No Admin)
@@ -85,9 +85,11 @@ All operations allowed. No CLI-level blocking. This is the current default behav
 | `calendar events/list/get/free-busy/calendars`                                              | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `calendar create/update/delete/focus-time/ooo/working-location`                             | ❌ | ✅ | ✅ | ✅ | ✅ |
 | `calendar respond`                                                                          | ❌ | ❌ | ✅ | ✅ | ✅ |
+| `calendar propose-time`                                                                     | ❌ | ❌ | ✅ | ✅ | ✅ |
 | **Chat**                                                                                |    |    |    |    |    |
 | `chat spaces list/get`, `chat messages list/get`, `chat dm list`                        | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `chat messages send`, `chat dm send`                                                      | ❌ | ❌ | ❌ | ✅ | ✅ |
+| `chat dm space`                                                                             | ❌ | ❌ | ❌ | ✅ | ✅ |
 | `chat spaces create`                                                                        | ❌ | ❌ | ❌ | ✅ | ✅ |
 | **Drive**                                                                               |    |    |    |    |    |
 | `drive ls/search/get/download/info/permissions`                                             | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -117,6 +119,15 @@ All operations allowed. No CLI-level blocking. This is the current default behav
 | `appscript list/get`                                                                        | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `appscript create`                                                                          | ❌ | ✅ | ✅ | ✅ | ✅ |
 | `appscript run`                                                                             | ❌ | ❌ | ✅ | ✅ | ✅ |
+
+| **Classroom**                                                                           |    |    |    |    |    |
+| `classroom courses/students/teachers/coursework list/get`                                   | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `classroom coursework create`, `classroom announcements create`                             | ❌ | ❌ | ✅ | ✅ | ✅ |
+| `classroom invitations create`, `classroom guardian-invitations create`                      | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Groups** (read-only today)                                                            |    |    |    |    |    |
+| `groups list/members`                                                                       | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Keep** (read-only today)                                                              |    |    |    |    |    |
+| `keep list/get`                                                                             | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ## UX
 
@@ -164,7 +175,7 @@ Error messages must be a **hard wall**. They should:
 4. Explicitly tell the agent not to try to work around it
 
 ```
-Error: "gmail send" is blocked by safety policy (level 1: draft)
+Error: "gmail send" is blocked by safety policy
 
 This operation is not permitted. Do not attempt to bypass this restriction.
 
@@ -175,7 +186,7 @@ The draft will appear in the user's Gmail drafts folder. A human must review and
 ```
 
 ```
-Error: "chat messages send" is blocked by safety policy (level 1: draft)
+Error: "chat messages send" is blocked by safety policy
 
 This operation is not permitted. Do not attempt to bypass this restriction.
 Direct messaging is disabled. No alternative is available at this safety level.
@@ -244,5 +255,7 @@ Levels can be referenced by number or name: `--safety-level=draft` or `--safety-
 
 1. **Default level for new installs?** Currently effectively level 4. Should we change the default? Probably not — backward compatibility.
 2. **Should `--safety-level` be storable in config.json?** Per-account safety levels would let you have one account at level 1 (agent) and another at level 4 (personal). Adds complexity.
-3. **Interaction with `--readonly`?** `--readonly` should be equivalent to / alias for `--safety-level=0`. If both are set, take the more restrictive.
-4. **Should `--enable-commands` and `--safety-level` compose?** Both must pass for a command to run. They're orthogonal: `--enable-commands` restricts which services, `--safety-level` restricts what you can do within allowed services.
+3. **Interaction with `--readonly`?** `--readonly` should be equivalent to / alias for `--safety-level=0`. If both are set, take the more restrictive. Note: L0 relies on OAuth scope enforcement, not the CLI blocked registry. Verify that cached tokens with broader scopes are handled correctly.
+5. **Threat model assumption:** Safety levels assume the agent cannot modify its own environment variables or config files. If the agent has shell access to set `GOG_SAFETY_LEVEL`, the mechanism can be bypassed. This is inherent to any env-var-based safety mechanism and should be documented.
+6. **Filter forwarding bypass:** `gmail settings filters create` is allowed at L1 for inbox organization, but a filter with a forward action can effectively auto-forward email. This is an accepted risk for v1, with a plan to validate filter actions in a future version.
+7. **Should `--enable-commands` and `--safety-level` compose?** Both must pass for a command to run. They're orthogonal: `--enable-commands` restricts which services, `--safety-level` restricts what you can do within allowed services.

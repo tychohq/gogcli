@@ -36,6 +36,7 @@ type RootFlags struct {
 	Plain          bool   `help:"Output stable, parseable text to stdout (TSV; no colors)" default:"${plain}" aliases:"tsv" short:"p"`
 	ResultsOnly    bool   `name:"results-only" help:"In JSON mode, emit only the primary result (drops envelope fields like nextPageToken)"`
 	Select         string `name:"select" aliases:"pick,project" help:"In JSON mode, select comma-separated fields (best-effort; supports dot paths). Desire path: use --fields for most commands."`
+	SafetyLevel    string `help:"Write safety level (0-4)" default:"${safety_level}"`
 	DryRun         bool   `help:"Do not make changes; print intended actions and exit successfully" aliases:"noop,preview,dryrun" short:"n"`
 	Force          bool   `help:"Skip confirmations for destructive commands" aliases:"yes,assume-yes" short:"y"`
 	NoInput        bool   `help:"Never prompt; fail instead (useful for CI)" aliases:"non-interactive,noninteractive"`
@@ -118,6 +119,18 @@ func Execute(args []string) (err error) {
 	}
 
 	if err = enforceEnabledCommands(kctx, cli.EnableCommands); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, errfmt.Format(err))
+		return err
+	}
+
+	safetyLevel, err := parseSafetyLevel(cli.SafetyLevel)
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, errfmt.Format(err))
+		return &ExitError{Code: 2, Err: err}
+	}
+	allow := parseSafetyOverrides(os.Getenv("GOG_ALLOW"))
+	block := parseSafetyOverrides(os.Getenv("GOG_BLOCK"))
+	if err = enforceSafetyLevel(kctx, safetyLevel, allow, block); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, errfmt.Format(err))
 		return err
 	}
@@ -254,7 +267,7 @@ func isCalendarEventsCommand(args []string) bool {
 
 func globalFlagTakesValue(flag string) bool {
 	switch flag {
-	case "--color", "--account", "--acct", "--client", "--enable-commands", "--select", "--pick", "--project", "-a":
+	case "--color", "--account", "--acct", "--client", "--enable-commands", "--safety-level", "--select", "--pick", "--project", "-a":
 		return true
 	default:
 		return false
@@ -304,6 +317,7 @@ func newParser(description string) (*kong.Kong, *CLI, error) {
 		"calendar_weekday": envOr("GOG_CALENDAR_WEEKDAY", "false"),
 		"client":           envOr("GOG_CLIENT", ""),
 		"enabled_commands": envOr("GOG_ENABLE_COMMANDS", ""),
+		"safety_level":     envOr("GOG_SAFETY_LEVEL", "4"),
 		"json":             boolString(envMode.JSON),
 		"plain":            boolString(envMode.Plain),
 		"version":          VersionString(),

@@ -734,7 +734,29 @@ func (c *AuthStatusCmd) Run(ctx context.Context, flags *RootFlags) error {
 		}
 	}
 
+	// Resolve safety level.
+	safetyLevelStr := "4"
+	if flags != nil && flags.SafetyLevel != "" {
+		safetyLevelStr = flags.SafetyLevel
+	}
+	safetyLevel, parseErr := parseSafetyLevel(safetyLevelStr)
+	if parseErr != nil {
+		safetyLevel = SafetyLevelUnrestricted
+	}
+	safetyName := safetyLevelNames[safetyLevel]
+	allow := parseSafetyOverrides(os.Getenv("GOG_ALLOW"))
+	block := parseSafetyOverrides(os.Getenv("GOG_BLOCK"))
+	hasOverrides := len(allow) > 0 || len(block) > 0
+
 	if outfmt.IsJSON(ctx) {
+		safetyObj := map[string]any{
+			"safetyLevel":     int(safetyLevel),
+			"safetyLevelName": safetyName,
+		}
+		if hasOverrides {
+			safetyObj["safetyAllow"] = allow
+			safetyObj["safetyBlock"] = block
+		}
 		return outfmt.WriteJSON(ctx, os.Stdout, map[string]any{
 			"config": map[string]any{
 				"path":   configPath,
@@ -753,6 +775,7 @@ func (c *AuthStatusCmd) Run(ctx context.Context, flags *RootFlags) error {
 				"service_account_configured": serviceAccountConfigured,
 				"service_account_path":       serviceAccountPath,
 			},
+			"safety": safetyObj,
 		})
 	}
 	u.Out().Printf("config_path\t%s", configPath)
@@ -771,6 +794,10 @@ func (c *AuthStatusCmd) Run(ctx context.Context, flags *RootFlags) error {
 		if serviceAccountPath != "" {
 			u.Out().Printf("service_account_path\t%s", serviceAccountPath)
 		}
+	}
+	u.Out().Printf("safety_level\t%d (%s)", safetyLevel, safetyName)
+	if hasOverrides {
+		u.Out().Printf("safety_overrides\tactive")
 	}
 	return nil
 }
